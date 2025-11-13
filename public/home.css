@@ -1,0 +1,148 @@
+* {
+  margin: 0;
+  padding: o;
+  font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  background: #fff;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 80px;
+  position: absolute;
+  width: 100%;
+  z-index: 10;
+}
+
+.hero-img {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-img img {
+  width: 50px;
+  height: 50px;
+}
+
+.menu ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  position: relative;
+  gap: 40px;
+}
+
+.menu ul li {
+  list-style: none;
+}
+
+.menu ul li a {
+  text-decoration: none;
+  color: #222;
+  font-weight: 500;
+  transition: 0.3s easy;
+}
+
+#subnavbar li a:hover,
+#subnavbar li a.active {
+  color: #088178;
+}
+
+#login-bnt {
+  background-color: black;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+}
+
+/* -------about page------- */
+.page {
+  display: flex;
+  height: 100vh;
+  position: relative;
+}
+
+.page-left {
+  flex: 1;
+  background-color: #fff3e9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 80px;
+}
+
+.page-left h1 {
+  font-size: 48px;
+  color: #222;
+  margin-bottom: 20px;
+}
+
+.page-left p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  max-width: 500px;
+}
+
+.page-button {
+  background-color: #fff3e9;
+  display: flex;
+  gap: 15px;
+}
+
+.page-button button {
+  height: 45px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.page-button .order-bnt {
+  position: relative;
+  left: -480px;
+  margin-top: 518px;
+  background-color: #4caf50;
+  color: #fff;
+  margin-right: 10px;
+}
+
+.page-button .how-bnt {
+  position: relative;
+  left: -480px;
+  margin-top: 518px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.page-button .how-bnt i {
+  font-size: 20px;
+  border: 2px solid #fff3e9;
+}
+
+.page-right {
+  flex: 1;
+  background-color: #f56b6b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.page-img {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-120%);
+  width: 400px;
+  border-radius: 30%;
+  border: 5px solid brown;
+}
