@@ -21,9 +21,9 @@ import Order from "../models/orderModel.js";
 export const getCartByUser = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const cart = await Cart.findOne({ user_id: userId }).populate(
-      "items.product_id"
-    );
+    const cart = await Cart.findOne({ user_id: userId, status: "ACTIVE" }).populate(
+      "items.product_id"
+    );
 
     if (!cart) {
       return res.status(404).json({ message: "Người dùng chưa có giỏ hàng" });

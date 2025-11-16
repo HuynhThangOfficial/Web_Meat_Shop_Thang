@@ -9,7 +9,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
-  </head>
+<script src="/js/authGuard.js"></script>
+</head>
   <body>
     <header class="navbar">
       <div class="hero-img">
@@ -20,7 +21,6 @@
           <li><a class="active" href="home.html">Home</a></li>
           <li><a href="product.html">Products</a></li>
           <li><a href="cart.html">Cart</a></li>
-          <li><a href="food.html">Foods</a></li>
           <li><a href="contact.html">Contact Us</a></li>
           <li id="login-bnt">
             <a href="login.html" style="color: #fff">Log In</a>
@@ -32,18 +32,17 @@
     <!-- about page -->
     <section class="page">
       <div class="page-left">
-        <h1>Choose the best meat for your family</h1>
+        <h1>Lựa chọn thịt tươi cho gia đình của bạn</h1>
         <p>
-          We provide fresh and safe meat. <br />Here you have many choices to
-          suit your taste and budget. <br />We thank you for your choice.
+          Chúng tôi là đơn vị cung cấp thịt tươi và an toàn <br />Tại đây bạn sẽ có nhiều lựa chọn
+          phù hợp với khẩu vị và ví tiền. <br />Cảm ơn bạn vì đã lựa chọn chúng tôi.
         </p>
       </div>
       <div class="page-button">
-        <button class="order-bnt">Order Now</button>
-        <button class="how-bnt">
-          <i class="fa-solid fa-circle-play"></i> How to order
-        </button>
-      </div>
+    <a href="product.html">
+      <button class="order-bnt">Order Now</button>
+    </a>
+    </div>
 
       <div class="page-right">
         <img src="./images/img-meat.png" alt="page-img-meat" class="page-img" />

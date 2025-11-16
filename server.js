@@ -12,6 +12,7 @@ import paymentLogRoutes from "./routes/paymentLogRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
+import momoRoutes from './routes/momoRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -22,11 +23,19 @@ app.use(express.json());
 // Serve static files from the "public" folder
 app.use(express.static("public"));
 
+// Thêm đoạn này vào gần chỗ app.use(express.static('public'))
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/login.html');
+});
+
 // Mount routes product
 app.use("/api/products", productRoutes);
 
 // productDetail
 app.use("/api/productDetails", productDetailRoutes);
+
+app.use("/api/cart", cartRoutes);
+app.use("/api/cartItem", cartItemRoutes);
 
 // Mount routes admin
 app.use("/api/admin", adminRoutes);
@@ -42,6 +51,8 @@ app.use("/api/cartItems", cartItemRoutes);
 
 //order
 app.use("/api/orders", orderRoutes);
+
+app.use("/api/momo", momoRoutes);
 
 // paymentLog
 app.use("/api/paymentLogs", paymentLogRoutes);

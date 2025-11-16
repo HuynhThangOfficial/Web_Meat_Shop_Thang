@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giỏ hàng - MeatShop</title>
+    <script src="/js/authGuard.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+    
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      /* --- NAVBAR STYLE (Lấy từ trang product.html) --- */
+      .navbar {
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 10px 5%;
+      }
+      .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+      }
+      .nav-links li {
+        margin-left: 20px;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+        padding: 10px;
+        transition: color 0.3s;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: #d9534f; /* Màu đỏ nhấn */
+      }
+      #login-btn, #logout-btn {
+        background-color: #d9534f;
+        color: #fff !important;
+        border-radius: 5px;
+        padding: 10px 15px;
+      }
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+      .dropbtn {
+        background-color: #333;
+        color: white;
+        padding: 12px 16px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      /* --- STYLE TRANG GIỎ HÀNG --- */
+      .cart-main-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 20px;
+        display: flex;
+        gap: 30px;
+      }
+      .cart-items-list {
+        flex: 3; /* Chiếm 3/4 */
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .cart-summary {
+        flex: 1; /* Chiếm 1/4 */
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        height: fit-content; /* Chỉ cao vừa đủ */
+      }
+      h2 {
+        color: #333;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+        margin-top: 0;
+      }
+      /* Style cho từng sản phẩm trong giỏ */
+      .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .item:last-child {
+        border-bottom: none;
+      }
+      .item-details {
+        display: flex;
+        align-items: center;
+        flex: 2;
+      }
+      .item-details img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+        margin-right: 15px;
+      }
+      .item-details span {
+        font-weight: bold;
+        font-size: 1.1em;
+      }
+      .item-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 3;
+        justify-content: flex-end;
+      }
+      .item-quantity {
+        width: 60px;
+        padding: 8px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .sub-total {
+        width: 120px;
+        text-align: right;
+        font-weight: bold;
+        color: #333;
+      }
+      .remove-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .remove-btn:hover {
+        background-color: #c0392b;
+      }
+      
+      /* Style cho phần tổng cộng */
+      .summary-total {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+      #checkout-button {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      #checkout-button:hover {
+        background-color: #218838;
+      }
+      .continue-shopping {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #d9534f;
+        text-decoration: none;
+      }
+
+      /* === CSS CHO MODAL THANH TOÁN === */
+      .modal-overlay {
+        display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+        width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+        justify-content: center; align-items: center;
+      }
+      .modal-content {
+        background-color: #fefefe; padding: 30px; border-radius: 8px;
+        width: 90%; max-width: 500px; position: relative;
+      }
+      .close-modal {
+        color: #aaa; position: absolute; right: 15px; top: 10px;
+        font-size: 28px; font-weight: bold; cursor: pointer;
+      }
+      .form-group { margin-bottom: 20px; }
+      .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+      .form-group input[type="text"], .form-group input[type="tel"] {
+        width: 95%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;
+      }
+      #confirm-checkout-btn {
+        background-color: #28a745; color: white; padding: 12px 20px;
+        border: none; border-radius: 4px; cursor: pointer;
+        width: 100%; font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="navbar">
+      <nav class="nav-container">
+        <div class="dropdown">
+          <button class="dropbtn">MENU ▾</button>
+          <ul class="dropdown-content">
+            <li><a href="#">Chicken</a></li>
+            <li><a href="#">Fish</a></li>
+            <li><a href="#">Pork</a></li>
+          </ul>
+        </div>
+        <ul class="nav-links">
+          <li><a href="home.html">Home</a></li>
+          <li><a href="product.html">Products</a></li>
+          <li><a class="active" href="cart.html">Cart</a></li>
+          <li><a href="food.html">Foods</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a id="login-btn" href="login.html">Log In</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="cart-main-container">
+
+      <div class="cart-items-list">
+        <h2>Giỏ Hàng Của Bạn</h2>
+        
+        <div id="cart-items">
+          </div>
+
+        <p id="empty-cart-message" style="display: none; text-align: center; font-size: 1.2em;">
+          Giỏ hàng của bạn đang trống.
+        </p>
+
+      </div>
+
+      <div class="cart-summary">
+        <h2>Tổng cộng</h2>
+        <div class="summary-total">
+          <span>Thành tiền:</span>
+          <span><span id="total-price">0</span> VNĐ</span>
+        </div>
+        
+        <button id="checkout-button">Tiến hành thanh toán</button>
+        
+        <a href="product.html" class="continue-shopping">
+          Tiếp tục mua sắm
+        </a>
+      </div>
+
+    </main>
+
+    <div id="shipping-modal" class="modal-overlay">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Thông tin đặt hàng</h2>
+        <form id="shipping-form">
+          <div class="form-group">
+            <label for="shipping-name">Họ và tên:</label>
+            <input type="text" id="shipping-name" required />
+          </div>
+          <div class="form-group">
+            <label for="shipping-phone">Số điện thoại:</label>
+            <input type="tel" id="shipping-phone" required />
+          </div>
+          <div class="form-group">
+            <label for="shipping-address">Địa chỉ nhận hàng:</label>
+            <input type="text" id="shipping-address" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/TP" required />
+          </div>
+          <hr />
+          <div class="form-group">
+            <label>Phương thức thanh toán:</label>
+            <div>
+              <input type="radio" id="payment-cod" name="payment" value="Tiền mặt" checked />
+              <label for="payment-cod">Tiền mặt (COD)</label>
+            </div>
+            <div>
+              <input type="radio" id="payment-momo" name="payment" value="Momo" />
+              <label for="payment-momo">Ví Momo</label>
+            </div>
+          </div>
+          <button type="submit" id="confirm-checkout-btn">Xác nhận Đặt Hàng</button>
+        </form>
+      </div>
+    </div>
+    
+    <script src="/js/cart.js"></script>
+  </body>
+</html>
