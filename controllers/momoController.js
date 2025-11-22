@@ -3,33 +3,35 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js'; 
 import Cart from '../models/cartModel.js';
 import Order from '../models/orderModel.js'; 
+import PaymentLog from "../models/paymentLogModel.js"; // Đã thêm
+// Import này chỉ cần nếu bạn muốn dùng User model, nhưng ta không dùng ở đây
 
-// === SỬA LỖI: DÙNG BỘ KEY TEST MỚI NHẤT TỪ CHATGPT ===
-const partnerCode = "MOMO";
-const accessKey = "F8BBA842ECF85";
-const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-// =======================================================
+// === BỘ KEY TEST CHUẨN ĐÃ XÁC THỰC ===
+const partnerCode = "MOMOBKUN20180529";
+const accessKey = "klm05bRhgYk6eN1A";
+const secretKey = "at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa";
 
 const apiEndpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
 
-// !!! QUAN TRỌNG: BẠN SẼ SỬA LẠI URL NÀY Ở BƯỚC 2 !!!
-const ngrokUrl = "https://semispontaneously-unsalubrious-angelica.ngrok-free.dev"; // URL HTTPS TẠM THỜI
+// !!! QUAN TRỌNG: SỬA LẠI URL NÀY VỚI URL HTTPS TỪ NGROK CỦA BẠN !!!
+const ngrokUrl = "https://semispontaneously-unsalubrious-angelica.ngrok-free.dev"; 
 
 const redirectUrl = `${ngrokUrl}/home.html`; // Trang sau khi thanh toán
-const ipnUrl = `${ngrokUrl}/api/momo/ipn`; // URL Momo gọi về báo kết quả
+const ipnUrl = `${ngrokUrl}/api/momo/ipn`; // URL Momo gọi về báo kết quả (PHẢI LÀ HTTPS)
+
+// ====================================================================
+// === PHẦN 1: TẠO YÊU CẦU THANH TOÁN (CLIENT GỌI) ===
+// ====================================================================
 
 export const createMomoPayment = async (req, res) => {
-    // Dòng kiểm tra (Dấu hiệu)
-    console.log("--- ĐANG CHẠY CODE MOI NHAT (Key MomoTest2024) ---"); 
+    console.log("--- ĐANG CHẠY CODE CUỐI CÙNG ---"); 
     
     try {
-        // Đọc đúng key "snake_case" từ frontend
         const { user_id, shipping_address, payment_method } = req.body;
 
-        // 1. Lấy giỏ hàng để biết tổng tiền
         const cart = await Cart.findOne({ user_id: user_id, status: "ACTIVE" });
         if (!cart || cart.items.length === 0) {
-            return res.status(404).json({ message: "Không tìm thấy giỏ hàng hoặc giỏ hàng trống" });
+            return res.status(404).json({ message: "Giỏ hàng trống" });
         }
         
         const amount = cart.total_price.toString();
@@ -39,7 +41,7 @@ export const createMomoPayment = async (req, res) => {
         const requestType = "captureWallet";
         const extraData = ""; 
 
-        // 2. TẠO ĐƠN HÀNG (Order)
+        // 1. TẠO ĐƠN HÀNG (Order)
         const newOrder = new Order({
             user_id: user_id,
             items: cart.items.map(i => ({
@@ -54,15 +56,26 @@ export const createMomoPayment = async (req, res) => {
             shipping_address: shipping_address,
             payment_method: payment_method,
         });
-        await newOrder.save();
+        const savedOrder = await newOrder.save();
+
+        // 2. GHI LOG GIAO DỊCH (PaymentLog) - Trạng thái: Đang xử lý
+        const newLog = new PaymentLog({
+            order_id: savedOrder._id,
+            user_id: user_id,
+            payment_method: payment_method, // "Ví điện tử"
+            transaction_id: orderId, // Dùng mã orderId của Momo làm mã giao dịch
+            amount: cart.total_price,
+            status: "Đang xử lý", 
+            note: "Đang chuyển hướng sang cổng thanh toán Momo"
+        });
+        await newLog.save();
         
-        // 3. Cập nhật giỏ hàng 
-        cart.status = "CHECKED_OUT"; // Khóa giỏ hàng
+        // 3. KHÓA GIỎ HÀNG
+        cart.status = "CHECKED_OUT"; 
         await cart.save();
 
 
-        // 4. TẠO CHỮ KÝ (Signature)
-        // (Đã sắp xếp đúng thứ tự và có accessKey)
+        // 4. TẠO CHỮ KÝ (Signature) - Đã sắp xếp đúng thứ tự
         const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
         
         const signature = CryptoJS.HmacSHA256(rawSignature, secretKey)
@@ -70,18 +83,8 @@ export const createMomoPayment = async (req, res) => {
 
         // 5. Gửi yêu cầu đến Momo
         const requestBody = {
-            partnerCode,
-            accessKey,
-            requestId,
-            amount,
-            orderId,
-            orderInfo,
-            redirectUrl,
-            ipnUrl,
-            extraData,
-            requestType,
-            signature, 
-            lang: 'vi'
+            partnerCode, accessKey, requestId, amount, orderId, orderInfo,
+            redirectUrl, ipnUrl, extraData, requestType, signature, lang: 'vi'
         };
 
         const response = await axios.post(apiEndpoint, requestBody);
@@ -96,5 +99,58 @@ export const createMomoPayment = async (req, res) => {
             console.error("Lỗi khi tạo thanh toán Momo:", error);
         }
         res.status(500).json({ message: "Lỗi server khi tạo thanh toán", error: error.message });
+    }
+};
+
+
+// ====================================================================
+// === PHẦN 2: XỬ LÝ TÍN HIỆU TỪ MOMO (IPN) ===
+// ====================================================================
+
+export const handleMomoIPN = async (req, res) => {
+    console.log("--- NHẬN TÍN HIỆU TỪ MOMO (IPN) ---");
+    
+    try {
+        // 1. Nhận dữ liệu Momo gửi về
+        const momoResponse = req.body;
+        const { resultCode, orderId, transId, message } = momoResponse;
+        
+        // 2. Tìm PaymentLog tương ứng (Dựa vào orderId)
+        const currentLog = await PaymentLog.findOne({ transaction_id: orderId });
+
+        // Momo yêu cầu phải trả về status 200/204 để tránh việc nó gọi lại liên tục
+        if (!currentLog) {
+            console.log("Không tìm thấy log giao dịch:", orderId);
+            return res.status(200).json({ message: "Log not found" }); 
+        }
+
+        // 3. Xử lý kết quả
+        if (resultCode == 0) { // resultCode 0 là THÀNH CÔNG
+            
+            // A. Cập nhật PaymentLog
+            currentLog.status = "Hoàn tất"; 
+            currentLog.note = `Thanh toán thành công qua Momo. Mã GD Momo: ${transId}.`;
+            await currentLog.save();
+
+            // B. Cập nhật Order (Đơn hàng)
+            const order = await Order.findById(currentLog.order_id);
+            if (order && order.status === 'Chờ xác nhận') {
+                order.status = "Đang xử lý"; // Đã trả tiền thì chuyển sang xử lý
+                await order.save();
+            }
+
+        } else {
+            // --- THANH TOÁN THẤT BẠI ---
+            currentLog.status = "Thất bại";
+            currentLog.note = `Thanh toán thất bại. Lỗi Momo: ${resultCode} - ${message}`;
+            await currentLog.save();
+        }
+
+        // 4. Trả lời cho Momo biết là mình đã nhận tin (BẮT BUỘC)
+        res.status(204).send(); 
+        
+    } catch (error) {
+        console.error("Lỗi xử lý IPN:", error);
+        res.status(500).json({ message: "Server error during IPN processing" });
     }
 };

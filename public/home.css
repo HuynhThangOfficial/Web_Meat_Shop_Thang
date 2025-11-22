@@ -55,7 +55,7 @@ body {
   color: #088178;
 }
 
-#login-bnt {
+#login-btn {
   background-color: black;
   color: white;
   padding: 8px 18px;
@@ -106,7 +106,7 @@ body {
   font-size: 16px;
 }
 
-.page-button .order-bnt {
+.page-button .order-btn {
   position: relative;
   left: -480px;
   margin-top: 518px;
@@ -115,7 +115,7 @@ body {
   margin-right: 10px;
 }
 
-.page-button .how-bnt {
+.page-button .how-btn {
   position: relative;
   left: -480px;
   margin-top: 518px;
@@ -124,7 +124,7 @@ body {
   border: 1px solid #ccc;
 }
 
-.page-button .how-bnt i {
+.page-button .how-btn i {
   font-size: 20px;
   border: 2px solid #fff3e9;
 }
